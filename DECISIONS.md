@@ -44,6 +44,7 @@ Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, s
 - Files are self-hosted from the `@fontsource/*` npm packages through the Vite font plugin (`vite.config.js`). The page never contacts Google, Bunny or any other font host. A test checks this.
 - Cairo: weights 400, 600, 700, subsets `arabic` and `latin`. Montserrat: 400, 500, 600, 700, `latin`. Lora: 400, 600, 700, `latin`. Only Cairo 400 and 700 are preloaded.
 - The scaffold's Instrument Sans is removed.
+- **Known gap, the shekel sign ₪:** it is not in our self-hosted font subsets (Cairo, Montserrat and Lora). The browser borrows it from a system font, and it shows correctly in Chrome on Windows, but that is not guaranteed on every device. Decide a firm solution when we build price display (Phase 2 or 3): either a tiny font subset that includes U+20AA, or an inline SVG sign. Test it on a phone.
 
 ## D6. Admin panel: Filament 5 at `/admin` (2026-11-20)
 
@@ -74,3 +75,13 @@ Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, s
 - **Stored names:** `amenities.icon` holds the full Heroicon name, for example `heroicon-o-bolt`.
 - **Gaps:** if a concept has no good Heroicon (for example elevator, parking, water drop), use the nearest one. Add a custom SVG only if nothing is close.
 - **Not icons:** the logo, the rings and the skyline are brand images, kept in `public/images/`.
+
+## D9. Navigation: no navbar, one burger menu (2026-11-20)
+
+- **No navbar, no bottom bar, no side bar.** The screen stays almost empty so people stay on one task. The only navigation is a burger button in the top corner (the start side: right in Arabic). It opens a full-page menu that slides in from that side, and an X in the same spot closes it. Escape also closes it, and focus stays inside while it is open.
+- The menu holds a few links and the language switch. Its items are defined in `config/menu.php` and shown by one component (`<x-ui.menu>`), so wrapping it into something smarter later means changing one place.
+- Pages lead the visitor to the next step with one main button, so the whole skeleton can be clicked through without opening the menu.
+- **Skeleton pages** are placeholders with a "Placeholder · Phase N" tag. They are never registered in production, so none of them can be deployed by accident.
+- **Language switch:** the choice is kept in the session and applied by `SetLocale`. The URL does not change with the language, so one address serves both languages. **Decide before launch** whether we need separate addresses per language (for example `/en/...`) so search engines can index both. Until then, this is the simple choice.
+- The 404 page always shows the default language (Arabic), because Laravel does not run the language middleware when no route matches.
+- Fields: the select is a styled native `<select>` for now, which is accessible by default. The plan's custom dropdown can replace it when the landing screen is built. The phone field shows the prefix list first (+970, +972), strips non-digits and a leading 0, and sends the full international number.
