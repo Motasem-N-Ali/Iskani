@@ -1,4 +1,30 @@
 services:
+  app:
+    build:
+      context: ./docker/php
+      args:
+        # Set UID/GID in your shell if yours are not 1000 (run `id -u` and `id -g`).
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    container_name: iskani-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      # Inside Docker, MySQL is reached by its service name, not 127.0.0.1.
+      DB_HOST: mysql
+      DB_PORT: 3306
+      PHP_CLI_SERVER_WORKERS: 4
+    # Not `artisan serve`: it does not pass the container's env vars (DB_HOST) to the web process.
+    # The router script reads the current folder as the web root, so we start inside public/.
+    command: sh -c "cd public && php -S 0.0.0.0:8000 ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   mysql:
     image: mysql:8.4
     container_name: iskani-mysql

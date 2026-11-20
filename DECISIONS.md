@@ -85,3 +85,12 @@ Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, s
 - **Language switch:** the choice is kept in the session and applied by `SetLocale`. The URL does not change with the language, so one address serves both languages. **Decide before launch** whether we need separate addresses per language (for example `/en/...`) so search engines can index both. Until then, this is the simple choice.
 - The 404 page always shows the default language (Arabic), because Laravel does not run the language middleware when no route matches.
 - Fields: the select is a styled native `<select>` for now, which is accessible by default. The plan's custom dropdown can replace it when the landing screen is built. The phone field shows the prefix list first (+970, +972), strips non-digits and a leading 0, and sends the full international number.
+
+## D10. PHP runs in Docker, not Herd (2026-11-20)
+
+- **Why:** Herd does not exist for Linux, and the developer switches between a laptop and a PC, both on Ubuntu. Running PHP in Docker gives both machines the same PHP version and extensions. A new machine needs only Docker and Node. This replaces the earlier plan of PHP on the host through Herd (`iskani.test`).
+- **How:** an `app` service in `docker-compose.yml`, built from `docker/php/Dockerfile` (PHP 8.4, Composer, `pdo_mysql`, `intl`, `gd`, `bcmath`, `zip`, `exif`, `pcntl`, `opcache`). The project folder is mounted in. The container runs as UID/GID 1000 (changeable) so files it writes are not owned by root. The site is at `http://localhost:8000`.
+- **Server:** `php -S` with Laravel's `server.php`, with 4 workers. Not `artisan serve`: it filters the environment, so `DB_HOST=mysql` from Compose never reaches the web process and the site fails with a 500. The built-in server is for development only. Production needs a real server (nginx with PHP-FPM, or FrankenPHP).
+- **Database host:** `.env` keeps `DB_HOST=127.0.0.1`. Compose overrides it to `mysql` inside the container, so the same `.env` works on every machine.
+- **Vite** still runs on the host (`npm run dev`), and the browser reaches it at `localhost:5173`.
+

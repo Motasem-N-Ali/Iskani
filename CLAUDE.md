@@ -19,25 +19,36 @@ Iskani is an Arabic-first housing-rental platform for the West Bank (pilot area:
 ## Commands
 
 ```sh
-docker compose up -d           # MySQL 8.4 (required for the app AND for tests)
-composer setup                 # first-time: install, .env, key, migrate, npm build
-npm run dev                    # Vite dev server (hot reload)
+docker compose up -d           # app (PHP 8.4) + MySQL 8.4; the site is at http://localhost:8000
+npm run dev                    # Vite dev server on the host (hot reload)
 npm run build                  # production assets (needed once so @vite works without npm run dev)
-php artisan test               # full suite
-php artisan test --filter=HomePageTest                  # one file, by name
-php artisan test --filter="trap"                        # one test, by words in its description
-php artisan test tests/Feature/HomePageTest.php         # one file, by path
-vendor/bin/pint                # format PHP (add --test to only check)
-php artisan make:filament-user # create an admin (email + password) for /admin
+docker compose exec app php artisan test    # full suite
+docker compose exec app php artisan test --filter=HomePageTest                  # one file, by name
+docker compose exec app php artisan test --filter="trap"                        # one test, by words in its description
+docker compose exec app php artisan test tests/Feature/HomePageTest.php         # one file, by path
+docker compose exec app vendor/bin/pint     # format PHP (add --test to only check)
+docker compose exec app php artisan make:filament-user # create an admin (email + password) for /admin
 ```
 
 `TokenEconomizer/` is a git submodule. Clone with `git clone --recurse-submodules`, or run `git submodule update --init` after a normal clone.
 
-The site is served by Laravel Herd at `http://iskani.test` (registered once with `herd link iskani`). Do not use `php artisan serve`.
+**First setup on a new machine** (needs only Docker and Node):
+
+```sh
+git clone --recurse-submodules <repo> && cd Iskani
+cp .env.example .env
+docker compose up -d --build
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate
+npm install && npm run build
+```
+
+PHP runs in the `app` container (`docker/php/Dockerfile`), which serves the site on `http://localhost:8000` with PHP's built-in server. The project folder is mounted into it, so edits show at once. Run every `php`, `composer` and `artisan` command through `docker compose exec app ...`. If your user id is not 1000, set `UID` and `GID` before building. Herd is not used (`DECISIONS.md` D10). Do not use `php artisan serve`: it does not pass the container's `DB_HOST` to the web process.
 
 ## Architecture
 
-- **Database lives in Docker only.** `docker-compose.yml` runs MySQL; PHP runs on the host through Herd. The init SQL in `docker/mysql/init/` creates `iskani_testing` and runs **only when the data volume is first created**.
+- **PHP and the database both live in Docker.** `docker-compose.yml` runs the `app` container (PHP 8.4) and MySQL, so every machine has the same setup. Only Node and Vite run on the host. The init SQL in `docker/mysql/init/` creates `iskani_testing` and runs **only when the data volume is first created**.
 - **Tests run on real MySQL** (`iskani_testing`, set in `phpunit.xml`), not SQLite, because spatial queries do not work on SQLite.
 - **Tests use Pest 4** in function style: `it('does something', function () { ... })`, one file per area in `tests/Feature`. `tests/Pest.php` links that folder to Laravel's `TestCase`. `php artisan test` runs Pest, and prints JSON because of `laravel/pao`. Do not run `vendor/bin/pest --init` again: it is already done and it hangs when it has no terminal.
 - **Livewire 4 single-file components.** A page is `resources/views/pages/⚡name.blade.php` (PHP class on top, template below, namespace `pages::`), routed with `Route::livewire('/listings', 'pages::listings')`. Small reusable Blade pieces are in `resources/views/components/ui` (`<x-ui.button>` and so on). The shared layout is `resources/views/layouts/app.blade.php`. Alpine ships inside Livewire, so it is not installed separately. Editors flag `Route::livewire()` as undefined; it is a runtime macro and works.
