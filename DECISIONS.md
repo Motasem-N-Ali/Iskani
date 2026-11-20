@@ -56,3 +56,11 @@ Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, s
 
 > **WARNING: admin access control must exist before any deployment.**
 > In the `local` environment Filament lets **every user** into `/admin`. In production it blocks **everyone** unless the `User` model implements `Filament\Models\Contracts\FilamentUser` with a `canAccessPanel()` method. We have no roles yet (Phase 1), so this is not done. Phase 1 must add the role check, with a test that a tenant or landlord gets a 403 on `/admin`, and nothing goes live before that.
+
+## D7. Tests: Pest 4 on PHPUnit 12 (2026-11-20)
+
+- Pest 4.7 with the Laravel plugin, in function style. The scaffold's PHPUnit class tests and its two placeholder examples were replaced.
+- Pest pins PHPUnit tightly, so PHPUnit moved from 12.5.45 down to **12.5.33** (same major version). Do not raise PHPUnit by hand. Update Pest instead.
+- We stay on **Pest 4**, not 5. Pest 5 needs PHPUnit 13, but our `composer.json` asks for PHPUnit `^12.5.12` (the Laravel scaffold default). Moving to Pest 5 later means moving PHPUnit to 13 on purpose, in its own step.
+- `laravel/pao` (from the Laravel scaffold) prints test results as one line of JSON. Keep it, because it keeps test output short for coding agents.
+- `tests/Feature/SpatialPointsTest.php` creates and drops a throwaway table `spatial_probe` in `iskani_testing`. It checks the SRID 4326 and `long-lat` rule from D3 with real Ramallah and Birzeit coordinates, including the 477 km "trap" case.
