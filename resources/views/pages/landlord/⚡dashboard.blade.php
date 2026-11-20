@@ -11,7 +11,9 @@ new class extends Component
 };
 ?>
 
-<main class="flex flex-1 flex-col gap-8">
+<main class="flex flex-1 flex-col gap-8 pt-16">
+    <x-ui.back :href="route('home')" />
+
     <x-ui.page-header :title="__('pages.landlord.dashboard.title')" :description="__('pages.landlord.dashboard.description')" :phase="2" />
 
     <x-ui.button :href="route('landlord.housings.create')" class="self-start">

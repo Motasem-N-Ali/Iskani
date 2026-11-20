@@ -94,3 +94,59 @@ Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, s
 - **Database host:** `.env` keeps `DB_HOST=127.0.0.1`. Compose overrides it to `mysql` inside the container, so the same `.env` works on every machine.
 - **Vite** still runs on the host (`npm run dev`), and the browser reaches it at `localhost:5173`.
 
+
+## D11. Landing page: dropdowns first, city then village (2026-11-20)
+
+- **No "Start" button.** The visitor lands on a city dropdown and one Continue button. Step 2 shows a village dropdown, whose first option is "All of <city>", then "Show homes", which goes to `/listings?city=...&village=...`. The page is one Livewire component that holds the step and the choices.
+- **Back arrow (step 2 only):** a curved arrow (`arrow-uturn-left`, mirrored in Arabic) in the same style as the burger button, directly under it. It has an `aria-label` ("Back" / "رجوع") because it is icon-only. On step 1 only the burger shows.
+- **Look:** the primary logo at the top center, the rings half outside the screen (a few overlap a little), and `landing.svg` on the bottom edge. On wide screens the skyline is capped at `max-w-4xl` so it does not grow into the form. The page skips the layout's padded container through `layoutData(['bleed' => true])`. The open menu always shows the light logo at the bottom center.
+- **Placeholder data:** the lists come from `config/areas.php`, because the `areas` table does not exist yet. The names and which village sits under which city are **not confirmed**. When the table is migrated and seeded, the page reads from it and the config file is deleted.
+
+## D12. Design rule: professional and calm (2026-11-20)
+
+- Iskani is a business, so the interface must look professional. Icons never scale, bounce, rotate or jump on hover or press. Hover changes color only (for example the back arrow turns primary blue). Motion is short and quiet: fades, a small slide-in, a soft background band. Nothing loops except the one approved forward-arrow nudge on the main Continue button.
+- Applied now: the burger, the X, the back arrow and the menu icons no longer grow on hover. The back arrow is smaller (32px icon in a 48px target) and lines up with the burger's center.
+- The full rule is in `CLAUDE.md`, under "Design rule".
+
+
+## D13. Landing starts with "tenant or landlord" (2026-11-20)
+
+- **Step 0 is two cards:** Tenant (a person at a laptop) and Landlord (an apartment building). Each is a button. On hover or keyboard focus the card turns primary blue and its text turns white. The illustrations are `public/images/landing/tenant.svg` and `landlord.svg` (from unDraw, free to use and change). Their purple `#6c63ff` was changed to brand primary-600 `#1843de`, and the pink `#ff6584` to primary-300 `#9baef4`. Each sits in a light panel (`primary-50`) inside the card, so its colors stay readable on the blue hover.
+- **Tenant** goes on to the city dropdown (step 1), then the village dropdown (step 2), as in D11. The back arrow shows from step 1 and goes back one step at a time.
+- **Landlord** goes straight to `landlord.dashboard` for now. When login exists, that page asks for it.
+- **The menu lost "For landlords" and "Log in"**, because the first screen now decides the role. The visitor menu is Home, Saved, My info and Language. The landlord menu is unchanged.
+- **Rings:** two sit up in the corner on the end side, spread diagonally and cut by the screen edges. One sits in the bottom corner on the start side. All use start/end, so they mirror with the language. All three are the same size so their strokes match.
+- **Menu logo:** the light logo is lifted (3.5rem from the bottom).
+
+## D14. Nothing is saved before login; anchors come after it (2026-11-20)
+
+- **The landing page saves nothing.** Choosing tenant or landlord, or a city and village, is not stored (no cookie, no localStorage). The cards show every time `/` is opened. An earlier version saved the choice in a cookie and redirected `/` straight to it. That was removed: it also broke Back, because after choosing "landlord" the Back button returned to `/`, which sent the visitor forward again.
+- **Anchors are a login feature.** When a person logs in and finishes the login steps, their place is remembered on their account, so later visits can open straight at it: the landlord area for a landlord, the listings of their city and village for a tenant. It lives in the database, as the `last_city_id` and `last_town_id` shortcut already planned in `docs/ERD.md`, and not in the browser. Nothing of this exists until login does.
+- **Back is never a loop:** the landing page and every page one level down use `<x-ui.back>`.
+
+## D17. The back control (2026-11-20)
+
+- **One component, `<x-ui.back>`:** a curved arrow with the word "Back" (Arabic: "رجوع") under it, fixed under the burger button and lined up with its center. It never says where it goes. It is a link (`href`) for a page one level down, or a button (`wire:click`) for a step inside a page.
+- **Where it shows:** the landing page from step 1 on, the listings page (back to the landing), a listing (back to the listings), and the landlord pages (dashboard back to the landing, housings back to the dashboard, add housing back to housings). Top-level menu pages (Saved, My info) have none. Pages with a back control add `pt-16` to their `<main>` so content never sits under it.
+- **Not in the menu.** The menu has no back item. A back control would go inside the menu only if the menu ever had a nested list. The language and theme are toggles, so today it does not.
+
+## D15. Light and dark themes (2026-11-20)
+
+- **Role tokens.** The brand colors never change. Templates use *role* tokens for anything that must flip: `surface`, `content`, `content-strong`, `content-soft`, `content-muted`, `accent`, `line`, `line-brand`, `tint`, `fill-muted`, `disabled-bg`, `disabled-fg`, `menu`, `menu-hover`. Their light and dark values are CSS variables in `resources/css/app.css` (`:root` and `[data-theme='dark']`). `paper` is the fixed "text on a brand fill" color (white in both themes). Dark text pairs were chosen for WCAG AA on `surface`.
+- **How the theme is chosen.** A small script in the layout head sets `data-theme` on `<html>` before the first paint: the saved choice (`localStorage` key `iskani.theme`), otherwise the system setting, and it follows the system until the visitor chooses. No flash. The menu has a Light / Dark toggle. Tailwind's `dark:` variant is tied to `data-theme='dark'`.
+- **Done:** all `x-ui` components, the 404 page, the landing page (cards, back arrow, headline, logo swap: primary logo on light, light logo on dark), the menu (its own dark blue).
+- **Still to do (plan):**
+  1. `/_kit`: it shows raw palette swatches on purpose (they stay), but its own text and panels need role tokens, and a theme switch for checking.
+  2. Every new page and component must be checked in both themes before it is called done (rule in `CLAUDE.md`).
+  3. `landing.svg` has light halo circles and bright buildings. It works on dark, but a dedicated dark version would look better.
+  4. The card illustrations stay on a light panel in dark mode, because they use dark outlines.
+  5. Danger red on dark is only fine for large text. Lighten it if it is ever used for body text.
+  6. Maps (MapLibre) will need a dark map style when they arrive.
+  7. The Filament admin has its own dark mode and is not part of this.
+  8. Show the saved theme choice in "My info" once that page is real.
+
+## D16. The landing page is one screen, and the menu has two toggles (2026-11-20)
+
+- **No scrolling on the landing page.** The page is exactly one screen tall (`h-dvh`, `overflow-hidden`, also on `<body>`) through the layout's `bleed` option. The logo, the card illustrations, the gaps and the skyline are sized from the screen height (`dvh`), so everything shrinks together on short screens, and the content block is wider (`max-w-3xl`) so the headline stays on one line. Checked from 360x640 up to 1920x1080: the page height equals the window height and the cards always end above the skyline. Very short landscape phones (under about 450px high) were not designed for.
+- **Language and theme are toggles** under the menu list, not an item with a sub-list. Each is a pill with two segments, the chosen one filled. There is no more back arrow inside the menu.
+

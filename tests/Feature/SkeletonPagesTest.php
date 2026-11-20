@@ -65,13 +65,89 @@ it('loads no fonts from other websites', function (string $url) {
 it('shows the site menu on visitor pages and the landlord menu on landlord pages', function () {
     $this->get('/saved')
         ->assertSee('المحفوظات')
-        ->assertSee('للمؤجرين')
+        ->assertDontSee('للمؤجرين')
+        ->assertDontSee('تسجيل الدخول')
         ->assertDontSee('إضافة عقار');
 
     $this->get('/landlord/housings')
         ->assertSee('إضافة عقار')
         ->assertSee('عقاراتي')
         ->assertDontSee('المحفوظات');
+});
+
+it('offers the language and the theme as two toggles under the menu list', function () {
+    $this->get('/saved')
+        ->assertSeeHtml('aria-label="اللغة"')
+        ->assertSeeHtml('name="locale" value="ar"')
+        ->assertSeeHtml('name="locale" value="en"')
+        ->assertSee('العربية')
+        ->assertSee('English')
+        ->assertSeeHtml('aria-label="المظهر"')
+        ->assertSeeHtml("setTheme('light')")
+        ->assertSeeHtml("setTheme('dark')")
+        ->assertSee('فاتح')
+        ->assertSee('داكن')
+        ->assertDontSeeHtml("view = 'language'");
+
+    $this->withSession(['locale' => 'en'])
+        ->get('/saved')
+        ->assertSee('Light')
+        ->assertSee('Dark');
+});
+
+it('marks the current language as pressed', function () {
+    $html = $this->get('/saved')->getContent();
+
+    expect($html)->toMatch('/value="ar"[^>]*aria-pressed="true"/')
+        ->and($html)->toMatch('/value="en"[^>]*aria-pressed="false"/');
+});
+
+it('has no back item inside the menu', function () {
+    foreach (['/landlord/housings', '/saved', '/'] as $url) {
+        $html = $this->get($url)->getContent();
+
+        preg_match('/<nav.*?<\/nav>/s', $html, $nav);
+
+        expect($nav[0])->not->toContain('رجوع')
+            ->and($nav[0])->not->toContain('العودة');
+    }
+});
+
+it('puts one back control under the burger on pages one level down, saying only Back', function (string $url, string $target) {
+    $html = $this->get($url)->assertOk()->getContent();
+
+    preg_match_all('/<a[^>]*href="([^"]*)"[^>]*class="fixed start-3 top-20[^"]*"[^>]*>.*?<\/a>/s', $html, $m);
+
+    expect($m[1])->toHaveCount(1)
+        ->and(parse_url($m[1][0], PHP_URL_PATH) ?: '/')->toBe($target)
+        ->and($m[0][0])->toContain('رجوع')
+        ->and($m[0][0])->toContain('<svg')
+        ->and($m[0][0])->not->toContain('الرئيسية');
+
+    $this->withSession(['locale' => 'en'])->get($url)->assertSee('Back');
+})->with([
+    'listings' => ['/listings', '/'],
+    'a listing' => ['/listings/1', '/listings'],
+    'landlord dashboard' => ['/landlord', '/'],
+    'my housings' => ['/landlord/housings', '/landlord'],
+    'add housing' => ['/landlord/housings/create', '/landlord/housings'],
+]);
+
+it('has no back control on the top-level pages', function (string $url) {
+    expect($this->get($url)->getContent())->not->toContain('class="fixed start-3 top-20');
+})->with(['/saved', '/me']);
+
+it('draws the burger button in brand black with no background, ring or shadow', function () {
+    $html = $this->get('/saved')->getContent();
+
+    preg_match('/<button[^>]*aria-controls="site-menu"[^>]*>/', $html, $match);
+
+    expect($match[0])->toContain('text-content')
+        ->not->toContain('bg-')
+        ->not->toContain('ring-')
+        ->not->toContain('shadow')
+        ->not->toContain('rounded')
+        ->not->toContain('primary');
 });
 
 it('translates the page title', function () {

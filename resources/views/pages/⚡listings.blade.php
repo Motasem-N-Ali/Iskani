@@ -11,7 +11,9 @@ new class extends Component
 };
 ?>
 
-<main class="flex flex-1 flex-col gap-8">
+<main class="flex flex-1 flex-col gap-8 pt-16">
+    <x-ui.back :href="route('home')" />
+
     <x-ui.page-header :title="__('pages.listings.title')" :description="__('pages.listings.description')" :phase="3" />
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

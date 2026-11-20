@@ -1,9 +1,9 @@
 @props(['variant' => 'primary', 'href' => null, 'type' => 'button'])
 
 @php
-    $classes = 'inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-lg font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:cursor-not-allowed disabled:opacity-50 '.(match ($variant) {
-        'secondary' => 'border-2 border-primary-600 bg-paper text-primary-600 hover:bg-primary-50',
-        'ghost' => 'text-primary-600 hover:bg-primary-50',
+    $classes = 'group inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-lg font-semibold transition duration-200 active:scale-[0.98] disabled:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:bg-disabled-bg disabled:text-disabled-fg disabled:hover:bg-disabled-bg '.(match ($variant) {
+        'secondary' => 'border-2 border-accent bg-surface text-accent hover:bg-tint disabled:border-disabled-bg',
+        'ghost' => 'text-accent hover:bg-tint',
         default => 'bg-primary-600 text-paper hover:bg-primary-700',
     });
 @endphp

@@ -54,6 +54,101 @@
     --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-serif: 'Lora', ui-serif, Georgia, serif;
+
+    /* Small entrance animations. Each plays once. They are turned off for people who ask
+       their system for reduced motion (see the rule at the end of this file). */
+    --animate-rise: rise 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    --animate-pop: pop 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    --animate-lift: lift 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    /* The "yeah, let's go!" push for a forward arrow while the button is hovered. It uses `transform`,
+       which Tailwind applies after the Arabic mirror (`rtl:-scale-x-100`), so it also points forward in RTL. */
+    --animate-nudge: nudge 1s ease-in-out infinite;
+
+    @keyframes rise {
+        from { opacity: 0; transform: translateY(1rem); }
+        to { opacity: 1; transform: none; }
+    }
+
+    @keyframes pop {
+        from { opacity: 0; transform: scale(0.85); }
+        to { opacity: 1; transform: none; }
+    }
+
+    @keyframes nudge {
+        0%, 100% { transform: translateX(0); }
+        40% { transform: translateX(0.5rem); }
+        70% { transform: translateX(0.15rem); }
+    }
+
+    @keyframes lift {
+        from { opacity: 0; transform: translateY(2.5rem); }
+        to { opacity: 1; transform: none; }
+    }
+}
+
+/* ---- Themes -------------------------------------------------------------------------------
+ * The brand colors above never change. What changes with the theme are the ROLE tokens below:
+ * `surface` (page and card background), `content` (text), `accent` (brand color used as text,
+ * border or icon), `line` (borders) and so on. Templates use the role tokens for anything that
+ * should flip in dark mode, and the brand tokens (`primary-*`, `paper`) for things that stay the
+ * same. `paper` is "text or icon on a brand-colored fill" (white in both themes).
+ * Light is the default. A tiny script in the layout head sets data-theme="dark" before the first
+ * paint, from the saved choice or from the system setting (see DECISIONS.md D15).
+ * Text pairs below were picked for WCAG AA (4.5:1) on `surface`.
+ */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root {
+    color-scheme: light;
+    --surface: #fdfdfd;
+    --content: #171717;
+    --content-strong: #040b26;
+    --content-soft: #2e4260;
+    --content-muted: #496288;
+    --accent: #1843de;
+    --line: #eeeff1;
+    --line-brand: #c9d3f9;
+    --tint: #f1f4fd;
+    --fill-muted: #eeeff1;
+    --disabled-bg: #eeeff1;
+    --disabled-fg: #7e90a9;
+    --menu-bg: #1843de;
+    --menu-hover: #1335b0;
+}
+
+[data-theme='dark'] {
+    color-scheme: dark;
+    --surface: #0b1226;
+    --content: #eef1fa;
+    --content-strong: #f8faff;
+    --content-soft: #cfd8ee;
+    --content-muted: #9fb0d0;
+    --accent: #6d89ef;
+    --line: #1f2a4a;
+    --line-brand: #2c3f80;
+    --tint: #111b3c;
+    --fill-muted: #18233f;
+    --disabled-bg: #18233f;
+    --disabled-fg: #6f7fa3;
+    --menu-bg: #091954;
+    --menu-hover: #0e2782;
+}
+
+@theme inline {
+    --color-surface: var(--surface);
+    --color-content: var(--content);
+    --color-content-strong: var(--content-strong);
+    --color-content-soft: var(--content-soft);
+    --color-content-muted: var(--content-muted);
+    --color-accent: var(--accent);
+    --color-line: var(--line);
+    --color-line-brand: var(--line-brand);
+    --color-tint: var(--tint);
+    --color-fill-muted: var(--fill-muted);
+    --color-disabled-bg: var(--disabled-bg);
+    --color-disabled-fg: var(--disabled-fg);
+    --color-menu: var(--menu-bg);
+    --color-menu-hover: var(--menu-hover);
 }
 
 @layer base {
@@ -66,10 +161,32 @@
         --font-serif: 'Cairo', ui-sans-serif, system-ui, sans-serif;
     }
 
+    /* Tailwind 4 resets buttons to the arrow cursor. Anything the visitor can click shows the hand,
+       and a disabled control shows "not allowed". */
+    button:not(:disabled),
+    [role='button']:not([aria-disabled='true']),
+    a[href],
+    select:not(:disabled),
+    summary,
+    label[for] {
+        cursor: pointer;
+    }
+
+    button:disabled,
+    select:disabled {
+        cursor: not-allowed;
+    }
+
     body {
-        background-color: var(--color-paper);
-        color: var(--color-ink);
+        background-color: var(--color-surface);
+        color: var(--color-content);
         /* Arabic has tall ascenders and diacritics, so body text needs room. */
         line-height: 1.6;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [class*='animate-'] {
+        animation: none !important;
     }
 }

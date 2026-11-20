@@ -18,11 +18,13 @@ new class extends Component
 };
 ?>
 
-<main class="flex flex-1 flex-col gap-8">
+<main class="flex flex-1 flex-col gap-8 pt-16">
+    <x-ui.back :href="route('listings')" />
+
     <x-ui.page-header :title="__('pages.listing.title')" :description="__('pages.listing.description')" :phase="3" />
 
     {{-- Photos, price and area are public. Address, map and contact stay locked until login. --}}
-    <div class="aspect-video rounded-2xl bg-mist-100" role="img" aria-label="{{ __('pages.listing.photos') }}"></div>
+    <div class="aspect-video rounded-2xl bg-fill-muted" role="img" aria-label="{{ __('pages.listing.photos') }}"></div>
 
     <div class="grid gap-3 sm:grid-cols-3">
         <x-ui.locked-block :label="__('pages.listing.locked_address')" />
@@ -37,8 +39,8 @@ new class extends Component
     <x-ui.sheet name="login" :title="__('pages.listing.sheet_title')">
         <ul class="mb-6 space-y-3">
             @foreach (__('pages.listing.sheet_unlocks') as $unlock)
-                <li class="flex items-center gap-3 text-steel-800">
-                    <x-heroicon-o-check-circle class="size-6 shrink-0 text-primary-600" />
+                <li class="flex items-center gap-3 text-content-soft">
+                    <x-heroicon-o-check-circle class="size-6 shrink-0 text-accent" />
                     {{ $unlock }}
                 </li>
             @endforeach
