@@ -9,11 +9,11 @@ new class extends Component
 ?>
 
 <main class="flex min-h-dvh flex-col items-center justify-center gap-6 px-4 text-center">
-    <h1 class="text-[clamp(2rem,6vw,4rem)] leading-tight font-bold text-primary-950">
+    <h1 class="font-serif text-[clamp(2rem,6vw,4rem)] leading-tight font-bold text-primary-950">
         {{ __('home.headline') }}
     </h1>
 
-    <p class="max-w-prose text-lg text-steel-600">
+    <p class="max-w-prose font-serif text-lg text-steel-600">
         {{ __('home.subtitle') }}
     </p>
 

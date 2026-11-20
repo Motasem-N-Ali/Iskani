@@ -36,10 +36,11 @@ PHP, Composer and the web server run on Windows through Laravel Herd (`iskani.te
 
 Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, so it is **not** installed separately. Components are single-file (PHP class on top, template below), generated with `php artisan make:livewire`. Livewire 4 serves its script from a hashed URL (`/livewire-<hash>/…`), not `/livewire/update`.
 
-## D5. Fonts (2026-11-20) — direction set, details open until step 6
+## D5. Fonts (2026-11-20)
 
-- **Arabic:** Cairo. If the visitor already has a close Arabic system font installed, use it instead of downloading Cairo (a fallback stack of locally installed fonts similar to Cairo).
-- **English:** Montserrat and Lora.
-- Self-hosted files only, no requests to Google Fonts. The scaffold's Instrument Sans setup is removed.
-
-**Open, to settle in step 6:** which of Montserrat and Lora is used where (for example Montserrat for interface text and Lora for headings, or the reverse), and the exact list of system Arabic fonts counted as close to Cairo.
+- **Arabic pages:** Cairo for everything. It is **always downloaded for every visitor**. We do not use a similar font that happens to be installed on the visitor's device, because every visitor must see the same Cairo.
+- **English pages:** Montserrat for interface text (`font-sans`: buttons, labels, cards). Lora for headlines and longer descriptive text (`font-serif`).
+- On Arabic pages `font-sans` and `font-serif` both become Cairo, because Lora has no Arabic letters. This switch is one `:lang(ar)` rule in `resources/css/app.css`.
+- Files are self-hosted from the `@fontsource/*` npm packages through the Vite font plugin (`vite.config.js`). The page never contacts Google, Bunny or any other font host. A test checks this.
+- Cairo: weights 400, 600, 700, subsets `arabic` and `latin`. Montserrat: 400, 500, 600, 700, `latin`. Lora: 400, 600, 700, `latin`. Only Cairo 400 and 700 are preloaded.
+- The scaffold's Instrument Sans is removed.

@@ -49,12 +49,23 @@
     --color-danger: #e53e3e;
     --color-info: #0066ff;
 
-    /* Replaced by Cairo, Montserrat and Lora in step 6. */
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    /* English. Font files are self-hosted (see vite.config.js).
+       sans = interface text (Montserrat), serif = headlines and long text (Lora). */
+    --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Lora', ui-serif, Georgia, serif;
 }
 
 @layer base {
+    /* Arabic pages: Cairo for everything, for every visitor. Lora has no Arabic
+       letters, so the serif role also becomes Cairo. Latin digits and words on an
+       Arabic page stay in Cairo too. */
+    :lang(ar) {
+        --font-sans: 'Cairo', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+            'Segoe UI Symbol', 'Noto Color Emoji';
+        --font-serif: 'Cairo', ui-sans-serif, system-ui, sans-serif;
+    }
+
     body {
         background-color: var(--color-paper);
         color: var(--color-ink);

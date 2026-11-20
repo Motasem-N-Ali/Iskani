@@ -6,6 +6,9 @@
 
         <title>{{ $title ?? config('app.name') }}</title>
 
+        {{-- Only the fonts this language uses: Cairo for Arabic, Montserrat + Lora for English. --}}
+        @fonts(app()->getLocale() === 'ar' ? ['cairo'] : ['montserrat', 'lora'])
+
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         @livewireStyles
