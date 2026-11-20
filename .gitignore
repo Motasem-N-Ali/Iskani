@@ -25,3 +25,6 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Private planning notes, not shared
+/docs/DEVELOPMENT_PLAN.MD
