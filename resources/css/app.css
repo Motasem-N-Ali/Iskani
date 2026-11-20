@@ -3,7 +3,62 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+ * Iskani design tokens (from the Figma palette sheet).
+ * `--color-*: initial` removes Tailwind's default palette on purpose, so only
+ * brand tokens exist and raw colors cannot slip into templates.
+ *
+ * Text contrast on `paper` (WCAG AA needs 4.5:1 for normal text):
+ *   OK for text:  ink, steel-800, steel-600, primary-600, primary-500
+ *   NOT for text: steel-400, primary-400, cyan, orange, green (use as fill, icon or border)
+ *   danger is for large text only.
+ */
 @theme {
+    --color-*: initial;
+
+    /* Brand blue. primary-600 is the main brand color. 50 and 100 are generated
+       (lighter steps toward white), they are not in the Figma file. */
+    --color-primary-50: #f1f4fd;
+    --color-primary-100: #e4e9fc;
+    --color-primary-200: #c9d3f9;
+    --color-primary-300: #9baef4;
+    --color-primary-400: #6d89ef;
+    --color-primary-500: #3f64ea;
+    --color-primary-600: #1843de;
+    --color-primary-700: #1335b0;
+    --color-primary-800: #0e2782;
+    --color-primary-900: #091954;
+    --color-primary-950: #040b26;
+
+    /* Neutrals */
+    --color-ink: #171717;
+    --color-paper: #fdfdfd;
+    --color-steel-800: #2e4260;
+    --color-steel-600: #496288;
+    --color-steel-400: #7e90a9;
+    --color-mist-100: #eeeff1;
+    --color-mist-50: #fafafa;
+
+    /* Support colors */
+    --color-support-cyan: #18a6de;
+    --color-support-violet: #5018de;
+
+    /* Status accents */
+    --color-success: #00cc44;
+    --color-warning: #ff6b00;
+    --color-danger: #e53e3e;
+    --color-info: #0066ff;
+
+    /* Replaced by Cairo, Montserrat and Lora in step 6. */
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@layer base {
+    body {
+        background-color: var(--color-paper);
+        color: var(--color-ink);
+        /* Arabic has tall ascenders and diacritics, so body text needs room. */
+        line-height: 1.6;
+    }
 }
