@@ -64,3 +64,13 @@ Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, s
 - We stay on **Pest 4**, not 5. Pest 5 needs PHPUnit 13, but our `composer.json` asks for PHPUnit `^12.5.12` (the Laravel scaffold default). Moving to Pest 5 later means moving PHPUnit to 13 on purpose, in its own step.
 - `laravel/pao` (from the Laravel scaffold) prints test results as one line of JSON. Keep it, because it keeps test output short for coding agents.
 - `tests/Feature/SpatialPointsTest.php` creates and drops a throwaway table `spatial_probe` in `iskani_testing`. It checks the SRID 4326 and `long-lat` rule from D3 with real Ramallah and Birzeit coordinates, including the 477 km "trap" case.
+
+## D8. Icons: Heroicons (2026-11-20)
+
+- **Why Heroicons:** it is the set made by the Tailwind team, it has 1,288 icons in four styles, and it is **already installed**, because Filament needs it (`blade-ui-kit/blade-heroicons`). The public site and the admin panel use the same set, and we install nothing new. This replaces the earlier idea of exporting an icon set from Figma.
+- **Use in Blade:** `<x-heroicon-o-home class="size-5" />`, or `svg('heroicon-o-home', 'size-5')` in PHP. Styles: `o` outline 24 px (default choice), `s` solid 24 px, `m` mini 20 px, `c` micro 16 px.
+- **Accessibility:** icons render with `aria-hidden="true"`, so they are decoration. A button that has only an icon needs a text label (`aria-label`, taken from `lang/` files).
+- **RTL:** mirror icons that point left or right (arrows, chevrons, "back") with `rtl:-scale-x-100`. Do not mirror the others (home, phone, bell).
+- **Stored names:** `amenities.icon` holds the full Heroicon name, for example `heroicon-o-bolt`.
+- **Gaps:** if a concept has no good Heroicon (for example elevator, parking, water drop), use the nearest one. Add a custom SVG only if nothing is close.
+- **Not icons:** the logo, the rings and the skyline are brand images, kept in `public/images/`.

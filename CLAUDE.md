@@ -44,6 +44,8 @@ The site is served by Laravel Herd at `http://iskani.test` (registered once with
 - **Locale and direction.** Default locale is `ar` (fallback `en`). The layout derives `lang` and `dir` from the app locale, so Arabic is RTL and English is LTR. UI text goes in `lang/ar/*.php` and `lang/en/*.php`, never hard-coded in Blade. Use logical Tailwind utilities (`ms-`, `me-`, `ps-`, `pe-`, `text-start`) and flip directional icons with `rtl:-scale-x-100`.
 - **Design tokens** are in `resources/css/app.css` under `@theme`. Tailwind's default palette is removed (`--color-*: initial`), so `bg-white` or `text-gray-500` do not exist. Use `primary-50…950`, `ink`, `paper`, `steel-*`, `mist-*`, `support-*`, `success`, `warning`, `danger`, `info`. No raw hex values in templates. The comments in that file list which colors pass contrast for text. `primary-50` and `primary-100` are generated, not from Figma.
 - **Fonts** are self-hosted from `@fontsource/*` packages through the font plugin in `vite.config.js`. Arabic pages use Cairo for everything, always downloaded for every visitor (never a similar installed font). English pages use Montserrat (`font-sans`) and Lora (`font-serif`). The switch is one `:lang(ar)` rule in `app.css` that remaps both utilities to Cairo. No requests to Google or any other font host (see `DECISIONS.md` D5).
+- **Data model** is drafted in `docs/ERD.md`. Get it agreed before writing any migration. The bottom of that file lists ideas parked for later (for example `public_point`) so they are not forgotten.
+- **Icons** are Heroicons, already installed through Filament: `<x-heroicon-o-home class="size-5" />`. They are decoration (`aria-hidden`), so icon-only buttons need a text label. Mirror left/right arrows and chevrons with `rtl:-scale-x-100`. Do not add another icon library (`DECISIONS.md` D8).
 - **Admin panel** is Filament, configured in `app/Providers/Filament/AdminPanelProvider.php`. Add one Resource per phase under `app/Filament/Resources`. Filament's assets in `public/css|js|fonts/filament` are git-ignored and rebuilt by `filament:upgrade` (runs after `composer install`). It is open to every user in `local` and closed to everyone elsewhere until `User::canAccessPanel()` exists. Do not deploy before that is done (`DECISIONS.md` D6).
 - **Coordinates** (`DECISIONS.md` D3): location columns are `POINT` with SRID 4326, always built as `ST_GeomFromText('POINT(lng lat)', 4326, 'axis-order=long-lat')`. Without the option MySQL reads latitude first and places Ramallah about 477 km away with no error.
 
@@ -51,6 +53,8 @@ The site is served by Laravel Herd at `http://iskani.test` (registered once with
 
 - Guest responses must never contain a listing's exact address, exact map point, landlord contact or IBAN. Locked parts render as neutral placeholder blocks, never blurred real data, because blurred data is still in the page source. This must be covered by tests.
 - Listing cards and teasers (photos, price, area) are public; opening full details requires login.
+- The login moment must feel instant. While the visitor types the code, preload only public things (map library, map tiles, fonts). Never send private data to a guest early, not even hidden. After login, one request reads the private details. Do slow work (travel times, image resizing) earlier in background jobs, never at login. See `docs/ERD.md`, "Speed at the login moment".
+- Phone numbers are never free text: a prefix list first (+970 default, also +972), then the digits, stored in international format.
 
 ## Communication Style
 
