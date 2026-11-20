@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Iskani is an Arabic-first housing-rental platform for the West Bank (pilot area: Ramallah and Al-Bireh). It is a Laravel 13 / Livewire 4 monolith with Tailwind 4 and MySQL 8 (spatial columns). Still to come: Filament admin at `/admin`, Pest, MapLibre maps, OSRM routing. Do not assume they exist yet.
+Iskani is an Arabic-first housing-rental platform for the West Bank (pilot area: Ramallah and Al-Bireh). It is a Laravel 13 / Livewire 4 monolith with Tailwind 4 and MySQL 8 (spatial columns). The Filament 5 admin panel exists at `/admin`. Still to come: Pest, MapLibre maps, OSRM routing. Do not assume those exist yet.
 
 ## Working agreement
 
@@ -27,7 +27,10 @@ php artisan test               # full suite
 php artisan test --filter=HomePageTest                  # one class or method name
 php artisan test tests/Feature/HomePageTest.php         # one file
 vendor/bin/pint                # format PHP (add --test to only check)
+php artisan make:filament-user # create an admin (email + password) for /admin
 ```
+
+`TokenEconomizer/` is a git submodule. Clone with `git clone --recurse-submodules`, or run `git submodule update --init` after a normal clone.
 
 The site is served by Laravel Herd at `http://iskani.test` (registered once with `herd link iskani`). Do not use `php artisan serve`.
 
@@ -39,6 +42,7 @@ The site is served by Laravel Herd at `http://iskani.test` (registered once with
 - **Locale and direction.** Default locale is `ar` (fallback `en`). The layout derives `lang` and `dir` from the app locale, so Arabic is RTL and English is LTR. UI text goes in `lang/ar/*.php` and `lang/en/*.php`, never hard-coded in Blade. Use logical Tailwind utilities (`ms-`, `me-`, `ps-`, `pe-`, `text-start`) and flip directional icons with `rtl:-scale-x-100`.
 - **Design tokens** are in `resources/css/app.css` under `@theme`. Tailwind's default palette is removed (`--color-*: initial`), so `bg-white` or `text-gray-500` do not exist. Use `primary-50…950`, `ink`, `paper`, `steel-*`, `mist-*`, `support-*`, `success`, `warning`, `danger`, `info`. No raw hex values in templates. The comments in that file list which colors pass contrast for text. `primary-50` and `primary-100` are generated, not from Figma.
 - **Fonts** are self-hosted from `@fontsource/*` packages through the font plugin in `vite.config.js`. Arabic pages use Cairo for everything, always downloaded for every visitor (never a similar installed font). English pages use Montserrat (`font-sans`) and Lora (`font-serif`). The switch is one `:lang(ar)` rule in `app.css` that remaps both utilities to Cairo. No requests to Google or any other font host (see `DECISIONS.md` D5).
+- **Admin panel** is Filament, configured in `app/Providers/Filament/AdminPanelProvider.php`. Add one Resource per phase under `app/Filament/Resources`. Filament's assets in `public/css|js|fonts/filament` are git-ignored and rebuilt by `filament:upgrade` (runs after `composer install`). It is open to every user in `local` and closed to everyone elsewhere until `User::canAccessPanel()` exists. Do not deploy before that is done (`DECISIONS.md` D6).
 - **Coordinates** (`DECISIONS.md` D3): location columns are `POINT` with SRID 4326, always built as `ST_GeomFromText('POINT(lng lat)', 4326, 'axis-order=long-lat')`. Without the option MySQL reads latitude first and places Ramallah about 477 km away with no error.
 
 ## Rules for listing data

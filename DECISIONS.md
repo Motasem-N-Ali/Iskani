@@ -44,3 +44,15 @@ Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, s
 - Files are self-hosted from the `@fontsource/*` npm packages through the Vite font plugin (`vite.config.js`). The page never contacts Google, Bunny or any other font host. A test checks this.
 - Cairo: weights 400, 600, 700, subsets `arabic` and `latin`. Montserrat: 400, 500, 600, 700, `latin`. Lora: 400, 600, 700, `latin`. Only Cairo 400 and 700 are preloaded.
 - The scaffold's Instrument Sans is removed.
+
+## D6. Admin panel: Filament 5 at `/admin` (2026-11-20)
+
+- Filament 5.11 runs inside the app, panel ID `admin`, set up in `app/Providers/Filament/AdminPanelProvider.php`. Each phase adds its own Resource (users, areas, housings, …).
+- Primary color is our exact blue scale (same values as `primary-*` in `app.css`).
+- **Font:** Filament's default, Inter, bundled with the package and served from our own site. We chose a clear, clean font for the admin and nothing more. The admin does not use Cairo. Inter has no Arabic letters, so Arabic text in the admin uses the device's system Arabic font.
+- Arabic and RTL work out of the box: the login page renders `lang="ar" dir="rtl"` with Arabic labels (tested).
+- Filament copies its CSS, JS and fonts into `public/css/filament`, `public/js/filament` and `public/fonts/filament`. These are git-ignored and recreated by `php artisan filament:upgrade`, which runs after every `composer install` / `update`.
+- Until Phase 1 the admin signs in with email and password (`php artisan make:filament-user`). Phone login comes with the accounts work.
+
+> **WARNING: admin access control must exist before any deployment.**
+> In the `local` environment Filament lets **every user** into `/admin`. In production it blocks **everyone** unless the `User` model implements `Filament\Models\Contracts\FilamentUser` with a `canAccessPanel()` method. We have no roles yet (Phase 1), so this is not done. Phase 1 must add the role check, with a test that a tenant or landlord gets a 403 on `/admin`, and nothing goes live before that.
