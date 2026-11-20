@@ -1,6 +1,6 @@
 # Iskani: Decisions
 
-Short records of technical choices and why. Newest at the bottom. Product decisions live in `docs/DEVELOPMENT_PLAN.MD` section 0.
+Short records of technical choices and why. Newest at the bottom. Product decisions are kept in the developer's private development plan, which is not in this repository.
 
 ## D1. Local environment: Herd + Docker (2026-11-20)
 
@@ -31,3 +31,15 @@ PHP, Composer and the web server run on Windows through Laravel Herd (`iskani.te
 | `ST_AsGeoJSON` | `[35.2028695836448, 31.904659245339186]` (lng, lat) |
 
 **Why:** a swapped order places a listing in the wrong country without any error. A Pest test will assert that a Ramallah point stays within a few km of Ramallah after a save and reload. Add this test with the first spatial migration.
+
+## D4. Livewire 4 with its bundled Alpine (2026-11-20)
+
+Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, so it is **not** installed separately. Components are single-file (PHP class on top, template below), generated with `php artisan make:livewire`. Livewire 4 serves its script from a hashed URL (`/livewire-<hash>/…`), not `/livewire/update`.
+
+## D5. Fonts (2026-11-20) — direction set, details open until step 6
+
+- **Arabic:** Cairo. If the visitor already has a close Arabic system font installed, use it instead of downloading Cairo (a fallback stack of locally installed fonts similar to Cairo).
+- **English:** Montserrat and Lora.
+- Self-hosted files only, no requests to Google Fonts. The scaffold's Instrument Sans setup is removed.
+
+**Open, to settle in step 6:** which of Montserrat and Lora is used where (for example Montserrat for interface text and Lora for headings, or the reverse), and the exact list of system Arabic fonts counted as close to Cairo.
