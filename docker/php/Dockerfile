@@ -18,6 +18,11 @@ ARG GID=1000
 RUN groupadd -g ${GID} app 2>/dev/null || true \
     && useradd -m -u ${UID} -g ${GID} app 2>/dev/null || true
 
+# vendor lives in a Docker volume (see docker-compose.yml). A new volume copies the
+# owner of this folder, so create it here, owned by the app user.
+RUN mkdir -p /var/www/html/vendor \
+    && chown -R ${UID}:${GID} /var/www/html
+
 USER ${UID}:${GID}
 WORKDIR /var/www/html
 

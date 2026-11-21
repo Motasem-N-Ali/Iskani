@@ -11,6 +11,9 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
+      # vendor stays inside Docker. On Windows, PHP reads big folders on the mounted
+      # project incompletely (blade-icons saw 515 of 1288 icons), so vendor must not be there.
+      - iskani-vendor:/var/www/html/vendor
     ports:
       - "127.0.0.1:8000:8000"
     environment:
@@ -49,4 +52,5 @@ services:
       retries: 20
 
 volumes:
+  iskani-vendor:
   iskani-mysql:

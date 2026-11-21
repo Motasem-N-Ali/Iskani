@@ -150,3 +150,10 @@ Front end is Blade + Livewire 4.4 + Tailwind. Alpine.js ships inside Livewire, s
 - **No scrolling on the landing page.** The page is exactly one screen tall (`h-dvh`, `overflow-hidden`, also on `<body>`) through the layout's `bleed` option. The logo, the card illustrations, the gaps and the skyline are sized from the screen height (`dvh`), so everything shrinks together on short screens, and the content block is wider (`max-w-3xl`) so the headline stays on one line. Checked from 360x640 up to 1920x1080: the page height equals the window height and the cards always end above the skyline. Very short landscape phones (under about 450px high) were not designed for.
 - **Language and theme are toggles** under the menu list, not an item with a sub-list. Each is a pill with two segments, the chosen one filled. There is no more back arrow inside the menu.
 
+## D18. `vendor` lives in a Docker volume (2026-11-21)
+
+- **Problem:** on the Windows PC (Docker Desktop), PHP read big folders on the mounted project folder incompletely. `FilesystemIterator` saw 515 of the 1288 files in the Heroicons folder, while `glob` and `ls` saw all of them. Blade Icons builds its icon list with that iterator, so `<x-heroicon-o-arrow-right>` failed and every page returned a 500 error. This was not a code bug. D10 assumed Ubuntu on both machines, where a bind mount is native and does not have this problem.
+- **Fix:** `docker-compose.yml` mounts a named volume `iskani-vendor` over `/var/www/html/vendor`, so Composer's files live on the Linux side of Docker. The Dockerfile creates that folder owned by the `app` user, because a new volume copies the owner of the image folder. Side effect: it is also much faster to read.
+- **What changes for the developer:** `vendor` on the host is no longer used by the container. Run `docker compose exec app composer install` once after the first `up` (and after any change to `composer.lock`). The editor will not see PHP packages in the host `vendor` folder.
+- **Not fixed by this:** `storage/` and `bootstrap/cache` are still on the mount. If a similar problem shows up there, the next step is to run the project from inside WSL2.
+

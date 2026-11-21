@@ -38,13 +38,13 @@ docker compose exec app php artisan make:filament-user # create an admin (email 
 git clone --recurse-submodules <repo> && cd Iskani
 cp .env.example .env
 docker compose up -d --build
-docker compose exec app composer install
+docker compose exec app composer install   # fills the vendor volume (D18)
 docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate
 npm install && npm run build
 ```
 
-PHP runs in the `app` container (`docker/php/Dockerfile`), which serves the site on `http://localhost:8000` with PHP's built-in server. The project folder is mounted into it, so edits show at once. Run every `php`, `composer` and `artisan` command through `docker compose exec app ...`. If your user id is not 1000, set `UID` and `GID` before building. Herd is not used (`DECISIONS.md` D10). Do not use `php artisan serve`: it does not pass the container's `DB_HOST` to the web process.
+PHP runs in the `app` container (`docker/php/Dockerfile`), which serves the site on `http://localhost:8000` with PHP's built-in server. The project folder is mounted into it, so edits show at once, except `vendor`, which lives in a Docker volume (`DECISIONS.md` D18): run `docker compose exec app composer install` after the first `up`. Run every `php`, `composer` and `artisan` command through `docker compose exec app ...`. If your user id is not 1000, set `UID` and `GID` before building. Herd is not used (`DECISIONS.md` D10). Do not use `php artisan serve`: it does not pass the container's `DB_HOST` to the web process.
 
 ## Architecture
 
